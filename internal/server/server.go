@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -12,18 +13,21 @@ type server struct {
 
 func NewServer() *server {
 	e := echo.New()
-
-	return &server{
+	s := &server{
 		e: e,
 	}
+
+	s.RegisterHTTP()
+
+	return s
 }
 
 func (s *server) Start() error {
-	return nil
+	return s.e.Start(":3000")
 }
 
-func (s *server) Stop() error {
-	return nil
+func (s *server) Stop(ctx context.Context) error {
+	return s.e.Shutdown(ctx)
 }
 
 func (s *server) RegisterHTTP() {
