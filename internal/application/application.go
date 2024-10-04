@@ -6,6 +6,12 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/ibez92/url_shortener/internal/repository"
+	"github.com/ibez92/url_shortener/internal/server"
+	"github.com/ibez92/url_shortener/internal/shorten"
+	"github.com/ibez92/url_shortener/internal/shorten/command"
+	"github.com/ibez92/url_shortener/internal/shorten/query"
 )
 
 type Server interface {
@@ -20,12 +26,24 @@ type Application struct {
 	sigs   chan os.Signal
 }
 
-func NewApplication(s Server) *Application {
+func NewApplication() *Application {
+	shortenRepo := repository.NewShortenMemoryRepo()
+	shortenSvc := &shorten.Service{
+		Queries: shorten.Queries{
+			GetByShortURL: query.NewGetByShortURLHandler(shortenRepo),
+		},
+		Commands: shorten.Commands{
+			Create: command.NewCreateShortenHandler(shortenRepo),
+		},
+	}
+
+	server := server.NewServer(shortenSvc)
+
 	return &Application{
 		ctx:    context.Background(),
 		stop:   make(chan struct{}),
 		sigs:   make(chan os.Signal),
-		server: s,
+		server: server,
 	}
 }
 

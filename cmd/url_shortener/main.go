@@ -1,13 +1,15 @@
 package main
 
 import (
+	"log"
+
 	"github.com/ibez92/url_shortener/internal/application"
-	"github.com/ibez92/url_shortener/internal/server"
 )
 
 func main() {
-	server := server.NewServer()
-	app := application.NewApplication(server)
+	app := application.NewApplication()
 
-	app.Run()
+	if err := app.Run(); err != nil {
+		log.Fatalf("Failed to start application: %s\n", err)
+	}
 }
