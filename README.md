@@ -16,3 +16,8 @@ Get info by short url
 ```bash
 curl -v localhost:3000/api/v1/shorten/{shortCode}
 ```
+
+Go to original url by short code
+```bash
+curl -v localhost:3000/{shortCode}
+```

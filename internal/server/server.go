@@ -35,6 +35,7 @@ func (s *server) Stop(ctx context.Context) error {
 }
 
 func (s *server) RegisterHTTP() {
+	s.e.GET("/:shortCode", s.Redirect)
 	s.registerAPIv1()
 }
 
@@ -54,6 +55,16 @@ type ShortenResponse struct {
 	ID        uint64 `json:"id"`
 	URL       string `json:"url"`
 	ShortCode string `json:"short_code"`
+}
+
+func (s *server) Redirect(c echo.Context) error {
+	shortCode := c.Param("shortCode")
+	shorten, err := s.shortenSvc.Queries.GetByShortURL.Handle(c.Request().Context(), shortCode)
+	if err != nil {
+		return c.NoContent(http.StatusNotFound)
+	}
+
+	return c.Redirect(http.StatusTemporaryRedirect, shorten.OrigianlURL)
 }
 
 func (s *server) CreateShorten(c echo.Context) error {
