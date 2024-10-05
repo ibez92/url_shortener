@@ -17,6 +17,16 @@ Get info by short url
 curl -v localhost:3000/api/v1/shorten/{shortCode}
 ```
 
+Update url
+```bash
+curl -v -X PUT -d '{"url": "https://microsoft.com"}' -H 'content-type: application/json' localhost:3000/api/v1/shorten/{shortCode}
+```
+
+Destroy url
+```bash
+curl -v -X DELETE -H 'content-type: application/json' localhost:3000/api/v1/shorten/{shortCode}
+```
+
 Go to original url by short code
 ```bash
 curl -v localhost:3000/{shortCode}

@@ -10,7 +10,9 @@ type Queries struct {
 }
 
 type Commands struct {
-	Create *command.CreateShortenHandler
+	Create  *command.CreateShortenHandler
+	Update  *command.UpdateShortenHandler
+	Destroy *command.DestroyShortenHandler
 }
 
 type Service struct {

@@ -47,7 +47,7 @@ func (s *server) registerAPIv1() {
 	apiV1.DELETE("/shorten/:shortURL", s.DeleteShorten)
 }
 
-type CreateRequest struct {
+type CreateUpdateRequest struct {
 	URL string `json:"url"`
 }
 
@@ -68,7 +68,7 @@ func (s *server) Redirect(c echo.Context) error {
 }
 
 func (s *server) CreateShorten(c echo.Context) error {
-	req := &CreateRequest{}
+	req := &CreateUpdateRequest{}
 	if err := c.Bind(req); err != nil {
 		c.Logger().Error("Invalid request")
 		return c.NoContent(http.StatusBadRequest)
@@ -98,9 +98,36 @@ func (s *server) GetShorten(c echo.Context) error {
 }
 
 func (s *server) UpdateShorten(c echo.Context) error {
-	return c.JSON(http.StatusOK, `{"status": "ok"}`)
+	req := &CreateUpdateRequest{}
+	if err := c.Bind(req); err != nil {
+		c.Logger().Error("Invalid request")
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	cmd := command.UpdateShortenCmd{
+		OrigianlURL: req.URL,
+		ShortCode:   c.Param("shortURL"),
+	}
+
+	shorten, err := s.shortenSvc.Commands.Update.Handle(c.Request().Context(), cmd)
+	if err != nil {
+		c.Logger().Errorf("Something went wrong: %s", err)
+		return c.NoContent(http.StatusUnprocessableEntity)
+	}
+
+	return c.JSON(http.StatusOK, &ShortenResponse{shorten.ID, shorten.OrigianlURL, shorten.ShortURL})
 }
 
 func (s *server) DeleteShorten(c echo.Context) error {
-	return c.JSON(http.StatusOK, `{"status": "ok"}`)
+	cmd := command.DestroyShortenCmd{
+		ShortCode: c.Param("shortURL"),
+	}
+
+	shorten, err := s.shortenSvc.Commands.Destroy.Handle(c.Request().Context(), cmd)
+	if err != nil {
+		c.Logger().Errorf("Something went wrong: %s", err)
+		return c.NoContent(http.StatusUnprocessableEntity)
+	}
+
+	return c.JSON(http.StatusOK, &ShortenResponse{shorten.ID, shorten.OrigianlURL, shorten.ShortURL})
 }

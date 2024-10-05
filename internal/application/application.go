@@ -33,7 +33,9 @@ func NewApplication() *Application {
 			GetByShortURL: query.NewGetByShortURLHandler(shortenRepo),
 		},
 		Commands: shorten.Commands{
-			Create: command.NewCreateShortenHandler(shortenRepo),
+			Create:  command.NewCreateShortenHandler(shortenRepo),
+			Update:  command.NewUpdateShortenHandler(shortenRepo),
+			Destroy: command.NewDestroyShortenHandler(shortenRepo),
 		},
 	}
 

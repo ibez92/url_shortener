@@ -21,30 +21,23 @@ func NewShortenMemoryRepo() *ShortenMemoryRepo {
 	}
 }
 
-func (r *ShortenMemoryRepo) GetByID(ctx context.Context, id uint64) (*entity.Shorten, error) {
-	r.mu.RLock()
-	if shorten, ok := r.shortens[id]; ok {
-		return shorten, nil
-	}
-	r.mu.RUnlock()
-
-	return nil, entity.ErrShortenNotFound
-}
-
 func (r *ShortenMemoryRepo) GetByShortURL(ctx context.Context, shortURL string) (*entity.Shorten, error) {
 	id := shorturl.IdByShortURL(shortURL) + 1
 
 	r.mu.RLock()
+	defer r.mu.RUnlock()
+
 	if shorten, ok := r.shortens[id]; ok {
 		return shorten, nil
 	}
-	r.mu.RUnlock()
 
 	return nil, entity.ErrShortenNotFound
 }
 
 func (r *ShortenMemoryRepo) Create(ctx context.Context, shorten *entity.Shorten) error {
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	if _, ok := r.shortens[shorten.ID]; ok {
 		return entity.ErrShortenAlreadyExists
 	}
@@ -54,20 +47,18 @@ func (r *ShortenMemoryRepo) Create(ctx context.Context, shorten *entity.Shorten)
 	shorten.ShortURL = shorturl.ShortURLByID(shorten.ID - 1)
 	r.shortens[shorten.ID] = shorten
 
-	r.mu.Unlock()
-
 	return nil
 }
 
 func (r *ShortenMemoryRepo) Update(ctx context.Context, shorten *entity.Shorten) error {
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	if _, ok := r.shortens[shorten.ID]; !ok {
 		return entity.ErrShortenNotFound
 	}
 
 	r.shortens[shorten.ID] = shorten
-
-	r.mu.Unlock()
 
 	return nil
 }
