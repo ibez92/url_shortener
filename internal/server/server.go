@@ -89,6 +89,10 @@ func (s *server) CreateShorten(c echo.Context) error {
 
 func (s *server) GetShorten(c echo.Context) error {
 	shortURL := c.Param("shortURL")
+	if shortURL == "" {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
 	shorten, err := s.shortenSvc.Queries.GetByShortURL.Handle(c.Request().Context(), shortURL)
 	if err != nil {
 		return c.NoContent(http.StatusNotFound)
@@ -98,6 +102,11 @@ func (s *server) GetShorten(c echo.Context) error {
 }
 
 func (s *server) UpdateShorten(c echo.Context) error {
+	shortURL := c.Param("shortURL")
+	if shortURL == "" {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
 	req := &CreateUpdateRequest{}
 	if err := c.Bind(req); err != nil {
 		c.Logger().Error("Invalid request")
@@ -106,7 +115,7 @@ func (s *server) UpdateShorten(c echo.Context) error {
 
 	cmd := command.UpdateShortenCmd{
 		OrigianlURL: req.URL,
-		ShortCode:   c.Param("shortURL"),
+		ShortCode:   shortURL,
 	}
 
 	shorten, err := s.shortenSvc.Commands.Update.Handle(c.Request().Context(), cmd)
@@ -123,11 +132,11 @@ func (s *server) DeleteShorten(c echo.Context) error {
 		ShortCode: c.Param("shortURL"),
 	}
 
-	shorten, err := s.shortenSvc.Commands.Destroy.Handle(c.Request().Context(), cmd)
+	err := s.shortenSvc.Commands.Destroy.Handle(c.Request().Context(), cmd)
 	if err != nil {
 		c.Logger().Errorf("Something went wrong: %s", err)
 		return c.NoContent(http.StatusUnprocessableEntity)
 	}
 
-	return c.JSON(http.StatusOK, &ShortenResponse{shorten.ID, shorten.OrigianlURL, shorten.ShortURL})
+	return c.NoContent(http.StatusNoContent)
 }

@@ -25,15 +25,15 @@ func NewDestroyShortenHandler(shortenDestroyRepo ShortenDestroyRepo) *DestroySho
 	}
 }
 
-func (h *DestroyShortenHandler) Handle(ctx context.Context, cmd DestroyShortenCmd) (*entity.Shorten, error) {
+func (h *DestroyShortenHandler) Handle(ctx context.Context, cmd DestroyShortenCmd) error {
 	shorten, err := h.shortenDestroyRepo.GetByShortURL(ctx, cmd.ShortCode)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := h.shortenDestroyRepo.Destroy(ctx, shorten); err != nil {
-		return nil, err
+		return err
 	}
 
-	return shorten, nil
+	return nil
 }

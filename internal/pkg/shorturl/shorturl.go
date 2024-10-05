@@ -8,7 +8,7 @@ import (
 
 var (
 	chars = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-	div   = uint64(len(chars))
+	div   = uint64(len(chars)) // 62
 )
 
 func ShortURLByID(id uint64) string {
